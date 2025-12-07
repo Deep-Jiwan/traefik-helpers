@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik-network
+
+  # Error pages service
+  error-pages:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.error-pages.loadbalancer.server.port=80"
+    networks:
+      - traefik-network
+    restart: unless-stopped
+
+  # Example main application (nginx)
+  main-app:
+    image: nginx:alpine
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.main-app.rule=Host(`localhost`)"
+      - "traefik.http.routers.main-app.entrypoints=web"
+      - "traefik.http.routers.main-app.middlewares=error-handler"
+      - "traefik.http.services.main-app.loadbalancer.server.port=80"
+      
+      # Error handling middleware - routes errors to error-pages service
+      - "traefik.http.middlewares.error-handler.errors.status=400-599"
+      - "traefik.http.middlewares.error-handler.errors.service=error-pages"
+      - "traefik.http.middlewares.error-handler.errors.query=/{status}"
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    driver: bridge
