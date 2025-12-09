@@ -3,7 +3,7 @@ services:
   error-pages:
     build:
       context: .
-      dockerfile: DockerfileReact
+      dockerfile: Dockerfile
     ports:
       - "500:80"
     restart: unless-stopped
