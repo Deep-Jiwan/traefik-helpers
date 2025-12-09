@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  base: process.env.VITE_CDN_URL || 'http://error-deep.adgone.co.tz/',
+  base: process.env.VITE_CDN_URL || 'https://error-deep.adgone.co.tz/',
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   build: {
     assetsInlineLimit: 10000,
