@@ -3,29 +3,25 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY pages/package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy source code
 COPY pages/ ./
 
-# Build the application
+# Generate static error pages
 RUN npm run build
 
 # Production stage
 FROM nginx:alpine
 
-# Copy built static files to nginx html directory
-COPY --from=builder /app/build/client /usr/share/nginx/html
+# Copy generated static HTML files
+COPY --from=builder /app/public/*.html /usr/share/nginx/html/
 
-# Copy custom nginx configuration
+# Ensure correct permissions
+RUN chmod -R 755 /usr/share/nginx/html && \
+    chown -R nginx:nginx /usr/share/nginx/html
+
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
 EXPOSE 80
-
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
