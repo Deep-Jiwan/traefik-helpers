@@ -4,10 +4,23 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  base: process.env.VITE_CDN_URL || '/',
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   build: {
-    // Inline small assets
-    assetsInlineLimit: 10000, // 10KB
+    assetsInlineLimit: 10000,
     cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        manualChunks: () => 'main',
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'assets/main.css';
+          }
+          return 'assets/[name].[ext]';
+        },
+      },
+    },
   },
 });
