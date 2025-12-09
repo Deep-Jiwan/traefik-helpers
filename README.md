@@ -22,3 +22,4 @@ Contributions are welcome via forks and pull requests.
 
 ## License
 MIT. Go crazy!
+
