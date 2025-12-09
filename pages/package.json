@@ -3,19 +3,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node generate-error-pages.js",
+    "build": "tsx build-from-react.js",
+    "build:simple": "node generate-error-pages.js",
+    "build:react": "react-router build",
     "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "node server.js",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
     "@react-router/node": "7.10.1",
     "@react-router/serve": "7.10.1",
+    "express": "^4.22.1",
     "isbot": "^5.1.31",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-icons": "^5.5.0",
-    "react-router": "7.10.1"
+    "react-router": "7.10.1",
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "@react-router/dev": "7.10.1",

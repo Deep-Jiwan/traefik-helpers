@@ -1,50 +1,94 @@
-version: '3.8'
-
 services:
   traefik:
-    image: traefik:v2.10
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
+    image: traefik:v3.6.4
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - frontend # your main traefik network to access other containers
     ports:
       - "80:80"
-      - "8080:8080"  # Traefik dashboard
+      - "443:443"
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - traefik-network
-
-  # Error pages service
-  error-pages:
-    build:
-      context: .
-      dockerfile: Dockerfile
+      - /var/lib/docker/volumes/traefik/certs:/var/traefik/certs:rw
+      - /var/lib/docker/volumes/traefik/dynamic:/dynamic
+      - /var/lib/docker/volumes/traefik/config/traefik.yaml:/etc/traefik/traefik.yaml:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.error-pages.loadbalancer.server.port=80"
-    networks:
-      - traefik-network
-    restart: unless-stopped
 
-  # Example main application (nginx)
-  main-app:
-    image: nginx:alpine
+      # HTTP router (redirect to HTTPS)
+      - "traefik.http.routers.dashboard-http.rule=Host(`dashboard-home.example.com`)"
+      - "traefik.http.routers.dashboard-http.entrypoints=web"
+      - "traefik.http.routers.dashboard-http.middlewares=https-redirect"
+
+      # HTTPS router
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard-home.example.com`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=cloudflare"
+
+      # HTTPS redirect middleware
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+
+  sablier:
+    container_name: sablier
+    image: sablierapp/sablier:1.10.1
+    command:
+      - start
+      - --provider.name=docker
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - frontend
+
+  mimic:
+    container_name: mimic
+    image: sablierapp/mimic:v0.3.1
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD", "/mimic", "healthcheck"]
+      interval: 5s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.main-app.rule=Host(`localhost`)"
-      - "traefik.http.routers.main-app.entrypoints=web"
-      - "traefik.http.routers.main-app.middlewares=error-handler"
-      - "traefik.http.services.main-app.loadbalancer.server.port=80"
-      
-      # Error handling middleware - routes errors to error-pages service
-      - "traefik.http.middlewares.error-handler.errors.status=400-599"
-      - "traefik.http.middlewares.error-handler.errors.service=error-pages"
-      - "traefik.http.middlewares.error-handler.errors.query=/{status}"
+      - "traefik.http.routers.mimic.rule=Host(`mimic-home.example.com`)"
+      - "traefik.http.routers.mimic.entrypoints=web"
+      - "traefik.http.routers.mimic.middlewares=my-sablier@file"
+      - "traefik.http.routers.mimic.service=mimic"
+      - "traefik.docker.allownonrunning=true"
+      - "traefik.http.services.mimic.loadbalancer.server.port=8080"
+      - "sablier.enable=true"
+      - "sablier.group=my-app-group"
+
+  error:
+    image: ghcr.io/deep-jiwan/mypackages/traefik-error-pages:autobuild
+    container_name: traefik-error-pages
     networks:
-      - traefik-network
+      - frontend
+    
+    labels:
+      - "traefik.enable=true"
+      # Router for HTTP access
+      - "traefik.http.routers.error.rule=Host(`error-home.example.com`)"
+      - "traefik.http.routers.error.entrypoints=web"
+
+      # Router for HTTPS access
+      - "traefik.http.routers.error-secure.rule=Host(`error-home.example.com`)"
+      - "traefik.http.routers.error-secure.entrypoints=websecure"
+      - "traefik.http.routers.error-secure.tls=true"
+
+      # Service definition
+      - "traefik.http.routers.error.service=error"
+      - "traefik.http.services.error.loadbalancer.server.port=80"
 
 networks:
-  traefik-network:
-    driver: bridge
+  frontend:
+    external: true

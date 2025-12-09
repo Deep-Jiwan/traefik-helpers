@@ -15,7 +15,18 @@ steps:
         - latest
         - ${DRONE_COMMIT_SHA}
         - autobuild
+        - ${DRONE_BUILD_DATE_TIME}
       dockerfile: Dockerfile
+          environment:
+            DRONE_BUILD_DATE_TIME:
+              from_secret: build_date_time
+          when:
+            event:
+              - push
+              - tag
+          commands:
+            - export DRONE_BUILD_DATE_TIME=$(date +"%m%d-%H%M")
+            - echo "Build date/time tag: $DRONE_BUILD_DATE_TIME"
       registry: ghcr.io
       platforms:
         - linux/arm64

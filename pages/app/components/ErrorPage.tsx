@@ -95,15 +95,19 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
   const [showTroubleshooting, setShowTroubleshooting] = useState(false);
   const errorData = errors[errorCode] || errors['404'];
 
+  // Detect if running in static build (no window, no React events)
+  const isStatic = typeof window === 'undefined';
+
   return (
     <div className="min-h-screen flex flex-col bg-[#081727]">
       {/* Header with Logo */}
       <header className="absolute top-0 right-0 p-8">
-        <img 
-          src="/logo.svg" 
-          alt="Logo" 
-          className="h-12 w-auto"
-        />
+        <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="55" stroke="#2aa2c1" strokeWidth="3" fill="none"/>
+          <path d="M60 25 L60 65 M60 75 L60 80" stroke="#2aa2c1" strokeWidth="6" strokeLinecap="round"/>
+          <circle cx="60" cy="60" r="35" stroke="#2aa2c1" strokeWidth="2" fill="none" opacity="0.3"/>
+          <text x="60" y="95" textAnchor="middle" fill="#2aa2c1" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="bold">LOGO</text>
+        </svg>
       </header>
 
       {/* Main Content */}
@@ -113,10 +117,7 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
           <div className="text-center mb-6">
             <h1 
               className="font-bold mb-4 text-[#2aa2c1]"
-              style={{ 
-                fontSize: '8rem', 
-                lineHeight: '1'
-              }}
+              style={{ fontSize: '8rem', lineHeight: '1' }}
             >
               {errorCode}
             </h1>
@@ -131,22 +132,20 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
           {/* Troubleshooting Section */}
           <div className="mt-8 border-t border-[#2f3d4d] pt-6">
             <button
-              onClick={() => setShowTroubleshooting(!showTroubleshooting)}
+              id="troubleshoot-toggle"
+              {...(isStatic ? { onClick: undefined, onclick: "toggleTroubleshooting()" } : { onClick: () => setShowTroubleshooting(!showTroubleshooting) })}
               className="w-full flex items-center justify-center gap-2 text-lg font-semibold text-[#2aa2c1] transition-colors hover:text-[#238a9f] focus:outline-none"
             >
               <span>Troubleshooting</span>
-              <FiChevronDown 
-                className={`w-5 h-5 transition-transform duration-200 ${
-                  showTroubleshooting ? 'rotate-180' : ''
-                }`}
-              />
+              <span id="arrow" className={`w-5 h-5 transition-transform duration-200 ${isStatic ? '' : (showTroubleshooting ? 'rotate-180' : '')}`}>
+                <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </span>
             </button>
 
             {/* Troubleshooting List */}
             <div
-              className={`overflow-hidden transition-all duration-200 ${
-                showTroubleshooting ? 'max-h-96 mt-4' : 'max-h-0'
-              }`}
+              id="content"
+              className={`overflow-hidden transition-all duration-200 ${isStatic ? '' : (showTroubleshooting ? 'max-h-96 mt-4' : 'max-h-0')}`}
             >
               <ul className="space-y-3">
                 {errorData.troubleshooting.map((tip, index) => (
@@ -155,11 +154,7 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
                     className="flex items-start gap-3 text-sm"
                     style={{ color: 'hsla(0, 0%, 100%, 0.74)' }}
                   >
-                    <span 
-                      className="mt-1 flex-shrink-0 text-[#2aa2c1] font-bold"
-                    >
-                      •
-                    </span>
+                    <span className="mt-1 flex-shrink-0 text-[#2aa2c1] font-bold">•</span>
                     <span>{tip}</span>
                   </li>
                 ))}
