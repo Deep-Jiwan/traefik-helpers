@@ -19,19 +19,18 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      # 1. Login to GHCR (using the host daemon)
       - echo $GHCR_PASSWORD | docker login ghcr.io -u $GHCR_USERNAME --password-stdin
+
+      - |
+          docker build \
+            --tag ghcr.io/deep-jiwan/mypackages/traefik-error-pages:latest \
+            --tag ghcr.io/deep-jiwan/mypackages/traefik-error-pages:${DRONE_COMMIT_SHA} \
+            --tag ghcr.io/deep-jiwan/mypackages/traefik-error-pages:autobuild \
+            .
       
-      # 2. Build using the local cache automatically
-      - docker build \
-          --tag ghcr.io/deep-jiwan/mypackages/traefik-error-pages:latest \
-          --tag ghcr.io/deep-jiwan/mypackages/traefik-error-pages:${DRONE_COMMIT_SHA} \
-          --tag ghcr.io/deep-jiwan/mypackages/traefik-error-pages:autobuild \
-          .
-      
-      # 3. Push the results
       - docker push ghcr.io/deep-jiwan/mypackages/traefik-error-pages:latest
       - docker push ghcr.io/deep-jiwan/mypackages/traefik-error-pages:${DRONE_COMMIT_SHA}
+
       
 volumes:
   - name: dockersock
