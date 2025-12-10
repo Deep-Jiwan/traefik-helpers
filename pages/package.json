@@ -3,9 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsx build-from-react.js",
-    "build:simple": "node generate-error-pages.js",
-    "build:react": "react-router build",
+    "build": "react-router build && node build-static-pages.js",
     "dev": "react-router dev",
     "start": "node server.js",
     "typecheck": "react-router typegen && tsc"
