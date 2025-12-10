@@ -240,8 +240,13 @@ async function main() {
     console.log(`✅ Generated public/${code}.html`);
   }
   
+  // Generate index.html (same as 404.html)
+  const indexHTML = generateHTML('404', cssContent);
+  fs.writeFileSync(path.join(publicDir, 'index.html'), indexHTML);
+  console.log(`✅ Generated public/index.html`);
+  
   console.log('\n🎉 All static HTML files generated successfully!');
-  console.log(`Generated files: ${errorCodes.map(c => `${c}.html`).join(', ')}`);
+  console.log(`Generated files: index.html, ${errorCodes.map(c => `${c}.html`).join(', ')}`);
 }
 
 main().catch(err => {
