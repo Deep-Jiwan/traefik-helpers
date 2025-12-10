@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { FiChevronDown } from "react-icons/fi";
 
 interface ErrorData {
   title: string;

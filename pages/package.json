@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
+    "build": "react-router build && node generate-static-pages.js",
     "build:simple": "node generate-error-pages.js",
     "build:gen": "node generate-static-error-pages",
-    "build:react": "react-router build",
+    "build:react": "react-router build && node generate-static-pages.js",
     "dev": "react-router dev",
     "start": "node server.js",
     "typecheck": "react-router typegen && tsc"
