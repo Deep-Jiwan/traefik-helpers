@@ -6,7 +6,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Build output
-pages/build/
+pages/build
 pages/.react-router/
 dist/
 

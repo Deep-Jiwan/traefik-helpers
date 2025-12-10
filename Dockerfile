@@ -9,7 +9,7 @@ RUN npm ci
 COPY pages/ ./
 
 # Generate static error pages from React components
-RUN npm run build:react
+RUN npm run build
 
 # Production stage - Use nginx to serve static files
 FROM nginx:alpine
