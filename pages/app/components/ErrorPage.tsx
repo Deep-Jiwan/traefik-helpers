@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { FiChevronDown } from "react-icons/fi";
 
 interface ErrorData {
   title: string;
@@ -95,9 +94,6 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
   const [showTroubleshooting, setShowTroubleshooting] = useState(false);
   const errorData = errors[errorCode] || errors['404'];
 
-  // Detect if running in static build (no window, no React events)
-  const isStatic = typeof window === 'undefined';
-
   return (
     <div className="min-h-screen flex flex-col bg-[#081727]">
       {/* Header with Logo */}
@@ -133,11 +129,11 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
           <div className="mt-8 border-t border-[#2f3d4d] pt-6">
             <button
               id="troubleshoot-toggle"
-              {...(isStatic ? { onClick: undefined, onclick: "toggleTroubleshooting()" } : { onClick: () => setShowTroubleshooting(!showTroubleshooting) })}
+              onClick={() => setShowTroubleshooting(!showTroubleshooting)}
               className="w-full flex items-center justify-center gap-2 text-lg font-semibold text-[#2aa2c1] transition-colors hover:text-[#238a9f] focus:outline-none"
             >
               <span>Troubleshooting</span>
-              <span id="arrow" className={`w-5 h-5 transition-transform duration-200 ${isStatic ? '' : (showTroubleshooting ? 'rotate-180' : '')}`}>
+              <span id="arrow" className={`w-5 h-5 transition-transform duration-200 ${showTroubleshooting ? 'rotate-180' : ''}`}>
                 <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </span>
             </button>
@@ -145,7 +141,7 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
             {/* Troubleshooting List */}
             <div
               id="content"
-              className={`overflow-hidden transition-all duration-200 ${isStatic ? '' : (showTroubleshooting ? 'max-h-96 mt-4' : 'max-h-0')}`}
+              className={`overflow-hidden transition-all duration-200 ${showTroubleshooting ? 'max-h-96 mt-4' : 'max-h-0'}`}
             >
               <ul className="space-y-3">
                 {errorData.troubleshooting.map((tip, index) => (

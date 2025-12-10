@@ -17,7 +17,7 @@ const ERROR_CODES = ['401', '403', '404', '405', '500', '502', '503'];
 const BUILD_DIR = path.join(__dirname, 'build', 'client');
 
 /**
- * Copy prerendered page to root as standalone file
+ * Copy prerendered page to root as standalone file and clean up directory
  */
 
 function copyErrorPage(errorCode) {
@@ -45,6 +45,9 @@ function copyErrorPage(errorCode) {
 
     fs.writeFileSync(targetFile, html, 'utf-8');
     console.log(`✓ Generated ${errorCode}.html from prerendered page`);
+
+    // Clean up the directory since we only need the standalone file
+    fs.rmSync(sourceDir, { recursive: true, force: true });
 
   } catch (error) {
     console.error(`✗ Failed to process ${errorCode}:`, error.message);
@@ -97,10 +100,6 @@ async function buildStaticPages() {
     console.log(`\nStandalone error pages created:`);
     ERROR_CODES.forEach(code => {
       console.log(`   - /${code}.html`);
-    });
-    console.log(`\nPrerendered directory pages (for SPA routing):`);
-    ERROR_CODES.forEach(code => {
-      console.log(`   - /${code}/index.html`);
     });
 
   } catch (error) {
