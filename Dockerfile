@@ -8,14 +8,15 @@ RUN npm ci
 
 COPY pages/ ./
 
-# Generate static error pages from React components
-RUN npm run build:react
+# Generate static error pages from React components with CDN URL
+ENV VITE_CDN_URL=https://error-deep.adgone.co.tz/
+RUN npm run build
 
 # Production stage - Use nginx to serve static files
 FROM nginx:alpine
 
 # Copy generated static HTML files to nginx
-COPY --from=builder /app/public/ /usr/share/nginx/html/
+COPY --from=builder /app/build/client/ /usr/share/nginx/html/
 
 # Ensure correct permissions
 RUN chmod -R 755 /usr/share/nginx/html && \

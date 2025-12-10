@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface ErrorData {
   title: string;
   description: string;
@@ -91,7 +89,6 @@ interface ErrorPageProps {
 }
 
 export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
-  const [showTroubleshooting, setShowTroubleshooting] = useState(false);
   const errorData = errors[errorCode] || errors['404'];
 
   return (
@@ -129,11 +126,10 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
           <div className="mt-8 border-t border-[#2f3d4d] pt-6">
             <button
               id="troubleshoot-toggle"
-              onClick={() => setShowTroubleshooting(!showTroubleshooting)}
               className="w-full flex items-center justify-center gap-2 text-lg font-semibold text-[#2aa2c1] transition-colors hover:text-[#238a9f] focus:outline-none"
             >
               <span>Troubleshooting</span>
-              <span id="arrow" className={`w-5 h-5 transition-transform duration-200 ${showTroubleshooting ? 'rotate-180' : ''}`}>
+              <span id="arrow" className="w-5 h-5 transition-transform duration-200">
                 <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </span>
             </button>
@@ -141,7 +137,7 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
             {/* Troubleshooting List */}
             <div
               id="content"
-              className={`overflow-hidden transition-all duration-200 ${showTroubleshooting ? 'max-h-96 mt-4' : 'max-h-0'}`}
+              className="overflow-hidden transition-all duration-200 max-h-0"
             >
               <ul className="space-y-3">
                 {errorData.troubleshooting.map((tip, index) => (
@@ -159,33 +155,41 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
           </div>
         </div>
       </main>
-
-      {/* Inline JavaScript for static HTML */}
-      {isStatic && (
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              function toggleTroubleshooting() {
-                var content = document.getElementById('content');
-                var arrow = document.getElementById('arrow');
-                if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-                  content.style.maxHeight = '0px';
-                  content.style.marginTop = '0px';
-                  arrow.style.transform = 'rotate(0deg)';
+      
+      {/* Inline script for dropdown - works without React hydration */}
+      <script dangerouslySetInnerHTML={{ __html: `
+        (function() {
+          function initDropdown() {
+            var toggleButton = document.getElementById('troubleshoot-toggle');
+            var content = document.getElementById('content');
+            var arrow = document.getElementById('arrow');
+            var isOpen = false;
+            
+            if (toggleButton && content && arrow) {
+              toggleButton.addEventListener('click', function() {
+                isOpen = !isOpen;
+                
+                if (isOpen) {
+                  content.classList.remove('max-h-0');
+                  content.classList.add('max-h-96', 'mt-4');
+                  arrow.classList.add('rotate-180');
                 } else {
-                  content.style.maxHeight = '24rem';
-                  content.style.marginTop = '1rem';
-                  arrow.style.transform = 'rotate(180deg)';
+                  content.classList.remove('max-h-96', 'mt-4');
+                  content.classList.add('max-h-0');
+                  arrow.classList.remove('rotate-180');
                 }
-              }
-              var button = document.getElementById('troubleshoot-toggle');
-              if (button) {
-                button.onclick = toggleTroubleshooting;
-              }
-            })();
-          `
-        }} />
-      )}
+              });
+            }
+          }
+          
+          // Run immediately if DOM is ready, otherwise wait
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDropdown);
+          } else {
+            initDropdown();
+          }
+        })();
+      ` }} />
     </div>
   );
 }

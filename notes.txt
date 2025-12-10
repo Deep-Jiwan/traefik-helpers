@@ -17,3 +17,5 @@ used generate statis error pages
 npm run build:simple 
 and load pages frrom public folder 
 
+$env:VITE_CDN_URL="https://error-deep.adgone.co.tz/"; npm run build
+
