@@ -15,7 +15,7 @@ RUN npm run build:react
 FROM nginx:alpine
 
 # Copy generated static HTML files to nginx
-COPY --from=builder /app/build/client/ /usr/share/nginx/html/
+COPY --from=builder /app/public/ /usr/share/nginx/html/
 
 # Ensure correct permissions
 RUN chmod -R 755 /usr/share/nginx/html && \

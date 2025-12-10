@@ -159,6 +159,33 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
           </div>
         </div>
       </main>
+
+      {/* Inline JavaScript for static HTML */}
+      {isStatic && (
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              function toggleTroubleshooting() {
+                var content = document.getElementById('content');
+                var arrow = document.getElementById('arrow');
+                if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                  content.style.maxHeight = '0px';
+                  content.style.marginTop = '0px';
+                  arrow.style.transform = 'rotate(0deg)';
+                } else {
+                  content.style.maxHeight = '24rem';
+                  content.style.marginTop = '1rem';
+                  arrow.style.transform = 'rotate(180deg)';
+                }
+              }
+              var button = document.getElementById('troubleshoot-toggle');
+              if (button) {
+                button.onclick = toggleTroubleshooting;
+              }
+            })();
+          `
+        }} />
+      )}
     </div>
   );
 }

@@ -73,7 +73,8 @@ services:
     container_name: traefik-error-pages
     networks:
       - frontend
-    
+    environment:
+      VITE_CDN_URL: "http://error-deep.adgone.co.tz/"
     labels:
       - "traefik.enable=true"
       # Router for HTTP access
