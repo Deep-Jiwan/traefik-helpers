@@ -133,7 +133,7 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
           <div className="mt-8 border-t border-[#2f3d4d] pt-6">
             <button
               id="troubleshoot-toggle"
-              {...(isStatic ? { onClick: undefined, onclick: "toggleTroubleshooting()" } : { onClick: () => setShowTroubleshooting(!showTroubleshooting) })}
+              onClick={isStatic ? undefined : () => setShowTroubleshooting(!showTroubleshooting)}
               className="w-full flex items-center justify-center gap-2 text-lg font-semibold text-[#2aa2c1] transition-colors hover:text-[#238a9f] focus:outline-none"
             >
               <span>Troubleshooting</span>
@@ -145,7 +145,7 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
             {/* Troubleshooting List */}
             <div
               id="content"
-              className={`overflow-hidden transition-all duration-200 ${isStatic ? '' : (showTroubleshooting ? 'max-h-96 mt-4' : 'max-h-0')}`}
+              className={`overflow-hidden transition-all duration-200 ${isStatic ? 'max-h-0' : (showTroubleshooting ? 'max-h-96 mt-4' : 'max-h-0')}`}
             >
               <ul className="space-y-3">
                 {errorData.troubleshooting.map((tip, index) => (
@@ -163,6 +163,33 @@ export default function ErrorPage({ errorCode = '404' }: ErrorPageProps) {
           </div>
         </div>
       </main>
+
+      {/* Inline JavaScript for static HTML */}
+      {isStatic && (
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              function toggleTroubleshooting() {
+                var content = document.getElementById('content');
+                var arrow = document.getElementById('arrow');
+                if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                  content.style.maxHeight = '0px';
+                  content.style.marginTop = '0px';
+                  arrow.style.transform = 'rotate(0deg)';
+                } else {
+                  content.style.maxHeight = '24rem';
+                  content.style.marginTop = '1rem';
+                  arrow.style.transform = 'rotate(180deg)';
+                }
+              }
+              var button = document.getElementById('troubleshoot-toggle');
+              if (button) {
+                button.onclick = toggleTroubleshooting;
+              }
+            })();
+          `
+        }} />
+      )}
     </div>
   );
 }

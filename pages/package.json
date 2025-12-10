@@ -5,6 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "build:simple": "node generate-error-pages.js",
+    "build:gen": "node generate-static-error-pages",
     "build:react": "react-router build",
     "dev": "react-router dev",
     "start": "node server.js",

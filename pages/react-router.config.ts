@@ -1,8 +1,8 @@
 import type { Config } from "@react-router/dev/config";
 
 export default {
-  // Enable SPA mode for static file generation
-  ssr: false,
+  // Server-side render for static HTML generation
+  ssr: true,
   // Configure build to inline assets
-  buildDirectory: "build",
+  buildDirectory: "build"
 } satisfies Config;
